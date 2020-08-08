@@ -1,0 +1,36 @@
+{
+  "name": "react-reserve",
+  "version": "1.0.0",
+  "description": "Project for MERN Stack - The Complete Guide",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next",
+    "start": "next start",
+    "build": "next build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "bcrypt": "^3.0.8",
+    "js-cookie": "^2.2.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.9.25",
+    "next": "^9.4.4",
+    "nookies": "^2.3.2",
+    "nprogress": "^0.2.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-stripe-checkout": "^2.6.3",
+    "semantic-ui-react": "^0.87.3",
+    "setimmediate": "^1.0.5",
+    "shortid": "^2.2.15",
+    "stripe": "^7.15.0",
+    "uuid": "^3.4.0",
+    "validator": "^11.1.0"
+  },
+  "devDependencies": {
+    "mongoimport": "^1.0.6"
+  }
+}

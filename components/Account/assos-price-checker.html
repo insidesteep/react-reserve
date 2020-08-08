@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      ;(async () => {
+        var currency = {
+          AU: 'AUD',
+          DE: 'EUR',
+          ROW: 'RUB',
+          ROE: 'EUR',
+          ES: 'EUR',
+          RU: 'RUB',
+          COM: 'GBP',
+          US: 'USD',
+          FR: 'USD',
+          DK: 'GBP',
+          IT: 'EUR',
+          NL: 'EUR',
+          PL: 'RUB',
+          SE: 'GBP',
+        }
+
+        let tmpArray = []
+        let countries = []
+        let prices = []
+
+        const url = 'https://www.asos.com/ru/dr-martens/chernye-botinki-s-8-parami-lyuversov-dr-martens-1460/prd/20540572?clr=chernyj&colourwayid=60062412&SearchQuery=&cid=4747'
+        const productId = url.split('/prd/')[1].split('?')[0]
+
+        await fetch(
+          `https://api.allorigins.win/get?url=${encodeURIComponent(
+            'https://www.asos.com/api/web/countrymetadata/v1/countrySelector/RU?keyStoreDataversion=j42uv2x-26&lang=ru-RU&platform=desktop'
+          )}`
+        )
+          .then((response) => {
+            if (response.ok) return response.json()
+            throw new Error('Network response was not ok.')
+          })
+          .then((data) => (countries = JSON.parse(data.contents)))
+
+        const uniqCountries = countries.data.countries.filter((country) =>
+          itemCheck(country)
+        )
+
+        await request(uniqCountries, productId)
+        console.log(prices)
+
+        const exchanges = await getExchange()
+        console.log(exchanges)
+
+        const result = prices.map((price) => ({
+          country: price.country,
+          price: price.current.value / exchanges[price.currency],
+        }))
+
+        console.log(result)
+
+        function minPrice(prices) {
+          const min = result.reduce((acc, curr) =>
+            acc.price < curr.price ? acc : curr
+          )
+
+          console.log(`${min.price} RUB, ${min.country}`)
+        }
+
+        console.log(minPrice(result))
+
+        function request(items, productId) {
+          console.log(items)
+          return Promise.all(
+            items.map((country) =>
+              fetch(
+                `https://api.allorigins.win/get?url=${encodeURIComponent(
+                  `https://www.asos.com/api/product/catalogue/v3/stockprice?productIds=${productId}&store=${
+                    country.storeCode
+                  }&currency=${
+                    currency[country.storeCode]
+                  }&keyStoreDataversion=j42uv2x-26`
+                )}`
+              )
+                .then((response) => {
+                  if (response.ok) return response.json()
+                  throw new Error('Network response was not ok.')
+                })
+                .then((data) => {
+                  const hasData = JSON.parse(data.contents).length !== 0
+
+                  if (hasData) {
+                    prices.push({
+                      ...JSON.parse(data.contents)[0].productPrice,
+                      country: country.name,
+                    })
+                  }
+                })
+            )
+          )
+        }
+
+        async function getExchange() {
+          const response = await fetch(
+            'https://api.exchangeratesapi.io/latest?base=RUB&symbols=USD,GBP,EUR,AUD,RUB'
+          )
+
+          const data = await response.json()
+
+          return data.rates
+        }
+
+        function itemCheck(item) {
+          if (tmpArray.indexOf(item.storeCode) === -1) {
+            tmpArray.push(item.storeCode)
+            return true
+          }
+          return false
+        }
+      })()
+    </script>
+  </body>
+</html>
